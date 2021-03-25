@@ -42,3 +42,24 @@ Replace `<device>` with the location of your SD card; e.g. `/dev/rdisk1`:
 ```
 unzip -p sdcard.img.zip | sudo dd bs=1m of=<device>
 ```
+
+### Operating on Disk Image ###
+To run the script on a disk image file you can set the image up as a block device and run the script on it.
+You'll need to find the partion names and might have to alter the script to match.
+```
+# Read disk image to file
+dd of=sdcard.img if=<device> bs=4096 status=progress
+
+# Mount the image as a device
+kpartx -a -f -p p -v sdcard.img
+
+# Locate virtual disk image partitions, check that they're infact the ones you think
+fdisk -l /dev/loop
+fdisk -l /dev/mapper/loopp2
+
+# Run script with the location of the virtual block device (/dev/loop0) and the location of the virtual block device linux partition (/dev/mapper/loop0p2)
+bash mkimg.sh /dev/loop0 sdcard.img.zip /dev/mapper/loop0p2
+
+# Unmount image
+kpartx -d -p p -v sdcard.img
+```
